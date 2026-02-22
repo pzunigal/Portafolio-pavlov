@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function SobreMi() {
   return (
     <section className="hero" id="about">
@@ -11,14 +13,14 @@ export default function SobreMi() {
             <div className="social-links">
               <a href="https://github.com/pzunigal" target="_blank"><i className="fab fa-github"></i></a>
               <a href="https://www.linkedin.com/in/pzunigal/" target="_blank"><i className="fab fa-linkedin"></i></a>
-              <a href="/assets/docs/CV_PabloZuniga.pdf" className="cv-button" download>
+              <a href="/assets/docs/CV_Pablo_Zuniga.pdf" className="cv-button" download>
                 <i className="fas fa-file-download"></i> CV
               </a>
             </div>
           </div>
           <div className="hero-image">
             <a href="https://www.linkedin.com/in/pzunigal/" target="_blank">
-              <img src="./assets/images/main.jpg" alt="Pablo Zúñiga" />
+              <Image src="/assets/images/main.jpg" width='800' height='800' alt="Pablo Zúñiga"/>
             </a>
           </div>
         </div>
