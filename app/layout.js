@@ -1,35 +1,45 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import '../styles/globals.css'; // Asegúrate de que esta ruta sea correcta para tu CSS global
+import { Inter } from "next/font/google";
+import "../styles/globals.css";
 
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata = {
-  title: "Portafolio - Pablo Zúniga",
-  description: "Creado con Next.js",
+  title: "Pablo Zúñiga | Full Stack Developer & QA Engineer",
+  description:
+    "Portafolio profesional de Pablo Zúñiga. Desarrollador Full Stack con experiencia en Java, Spring Boot, React y calidad de software.",
+  keywords: [
+    "Pablo Zúñiga",
+    "Full Stack Developer",
+    "QA Engineer",
+    "Java",
+    "Spring Boot",
+    "React",
+    "Portafolio",
+  ],
+  authors: [{ name: "Pablo Zúñiga" }],
+  openGraph: {
+    title: "Pablo Zúñiga | Full Stack Developer & QA Engineer",
+    description:
+      "Portafolio profesional de Pablo Zúñiga. Desarrollador Full Stack con experiencia en Java, Spring Boot, React y calidad de software.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html lang="es" className={inter.variable}>
       <head>
-        {/* Enlace a CSS externo (Google Fonts) - ESTO ESTÁ BIEN */}
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"></link>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+        {/* Font Awesome for tech stack icons */}
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-
-        {children}
-      </body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
-

@@ -1,84 +1,101 @@
-"use client"; // Esta directiva es crucial para Next.js para indicar que es un Client Component
+"use client";
 
-import React, { useEffect } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
-const Starfield = () => {
-  useEffect(() => {
-    const starfieldContainer = document.getElementById('starfield-container');
-    const numberOfStars = 1200; // Puedes ajustar este número para más o menos estrellas
+const STAR_COUNT_DESKTOP = 220;
+const STAR_COUNT_MOBILE = 80;
 
-    // Limpiar estrellas existentes si el componente se renderiza de nuevo
-    // Esto es útil si el componente se monta y desmonta varias veces
-    starfieldContainer.innerHTML = '';
+export default function Starfield() {
+  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const starsRef = useRef([]);
 
-    for (let i = 0; i < numberOfStars; i++) {
-      const star = document.createElement('div');
-      // Eliminadas las clases de Tailwind CSS. Ahora las propiedades se definen en el CSS.
-      star.className = 'star';
-      star.style.top = `${Math.random() * 100}%`;
-      star.style.left = `${Math.random() * 100}%`;
-      star.style.width = `${Math.random() * 2 + 0.5}px`; // Tamaño variado entre 0.5px y 2.5px
-      star.style.height = `${Math.random() * 2 + 0.5}px`;
-      star.style.animationDelay = `${Math.random() * 7}s`; // Retraso de animación variado
-      star.style.animationDuration = `${Math.random() * 5 + 2}s`; // Duración de animación variada
-      starfieldContainer.appendChild(star);
+  const initStars = useCallback((width, height, count) => {
+    const stars = [];
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.5 + 0.3,
+        alpha: Math.random() * 0.6 + 0.2,
+        speed: Math.random() * 0.15 + 0.02,
+        twinkleSpeed: Math.random() * 0.008 + 0.002,
+        twinkleOffset: Math.random() * Math.PI * 2,
+      });
     }
-  }, []); // El array vacío asegura que el efecto se ejecute solo una vez al montar el componente
+    return stars;
+  }, []);
 
-  return (
-    <div className="starfield-container">
-      {/* Contenedor donde se inyectarán las estrellas dinámicamente */}
-      <div className="starfield" id="starfield-container"></div>
-      <style>
-        {`
-        .starfield-container {
-            position: fixed; /* Usar fixed para que ocupe toda la ventana y no se desplace con el scroll */
-            top: 0;
-            left: 0;
-            width: 100vw; /* Ocupa todo el ancho de la ventana visible */
-            height: 100vh; /* Ocupa toda la altura de la ventana visible */
-            background-color: #000000ff; /* Fondo muy oscuro para que las estrellas destaquen */
-            overflow: hidden; /* Oculta cualquier estrella que se salga de los límites */
-            z-index: -1; /* Asegura que esté detrás de todo el contenido de la página */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    let width, height;
+
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const count = width < 768 ? STAR_COUNT_MOBILE : STAR_COUNT_DESKTOP;
+      starsRef.current = initStars(width, height, count);
+    };
+
+    resize();
+    window.addEventListener("resize", resize);
+
+    let time = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      for (const star of starsRef.current) {
+        let alpha = star.alpha;
+        if (!prefersReduced) {
+          alpha =
+            star.alpha *
+            (0.5 +
+              0.5 * Math.sin(time * star.twinkleSpeed + star.twinkleOffset));
+          star.y -= star.speed;
+          if (star.y < -5) {
+            star.y = height + 5;
+            star.x = Math.random() * width;
+          }
         }
 
-        .starfield {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            pointer-events: none; /* Asegura que el fondo no interfiera con los eventos de clic/mouse */
-        }
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(220, 225, 255, ${alpha})`;
+        ctx.fill();
 
-        .star {
-            position: absolute; /* Añadido para reemplazar 'absolute' de Tailwind */
-            background-color: white; /* Añadido para reemplazar 'bg-white' de Tailwind */
-            border-radius: 50%; /* Añadido para reemplazar 'rounded-full' de Tailwind */
-            
-            /* La opacidad inicial es 0 y es controlada por la animación 'twinkle' */
-            animation: twinkle var(--animation-duration, 5s) infinite ease-in-out alternate; /* Animación de parpadeo */
-            box-shadow: 0 0 3px rgba(255, 255, 255, 0.08); /* Sutil brillo alrededor de la estrella */
+        // Tiny glow for larger stars
+        if (star.radius > 1) {
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 200, 255, ${alpha * 0.08})`;
+          ctx.fill();
         }
+      }
 
-        @keyframes twinkle {
-            0% { opacity: 0; transform: scale(0.5); } /* Empieza invisible y pequeña */
-            50% { opacity: 1; transform: scale(1); } /* Se vuelve visible y de tamaño normal */
-            100% { opacity: 0; transform: scale(0.5); } /* Vuelve a ser invisible y pequeña */
-        }
+      time++;
+      animationRef.current = requestAnimationFrame(draw);
+    };
 
-        /* Ajustes responsivos para el tamaño de las estrellas en pantallas pequeñas */
-        @media (max-width: 768px) {
-            .star {
-                width: 1px; /* Estrellas más pequeñas para dispositivos móviles */
-                height: 1px;
-            }
-        }
-        `}
-      </style>
-    </div>
-  );
-};
+    draw();
 
-export default Starfield;
+    return () => {
+      window.removeEventListener("resize", resize);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    };
+  }, [initStars]);
+
+  return <canvas ref={canvasRef} id="starfield-canvas" aria-hidden="true" />;
+}
