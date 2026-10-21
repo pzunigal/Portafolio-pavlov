@@ -112,7 +112,7 @@ export default function Experience() {
             />
           </div>
 
-          <div className="glass-panel divide-y divide-white/[0.06] overflow-hidden">
+          <div className="glass-panel p-0 divide-y divide-white/[0.06] overflow-hidden">
             {education.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -120,7 +120,7 @@ export default function Experience() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="flex flex-col sm:flex-row sm:items-center gap-5 px-7 py-7 md:px-8"
+                className="flex flex-col mb-4 sm:flex-row sm:items-center gap-5 px-7 py-7 md:px-8 last:mb-0"
               >
                 <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-nebula-cyan/10 border border-nebula-cyan/15 flex items-center justify-center text-nebula-cyan">
                   <GraduationCap size={22} />
